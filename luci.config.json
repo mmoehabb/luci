@@ -1,0 +1,21 @@
+{
+  "title": "Hello World Example",
+  "description": "Just a simple example of using luci.",
+  "bash": {
+    "example": "echo Hello World!",
+    "run": {
+      "exm1": "echo Example 1",
+      "exm2": {
+        "title": "Example 2 Title",
+        "description": "Example 2 Description",
+        "cmd": "echo Example 2"
+      }
+    }
+  },
+  "zshell": {
+    "example": "echo Hello World!"
+  },
+  "bat": {
+    "example": "echo Hello World!"
+  }
+}
