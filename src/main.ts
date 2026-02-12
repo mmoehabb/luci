@@ -47,24 +47,29 @@ function printUsage(config: Config) {
   for (const cmd in config[shell]) printCommand(config, [cmd]);
 }
 
-function printCommand(config: Config, inputs: Array<string>) {
+function printCommand(config: Config, inputs: Array<string>, level: number = 0) {
   const command = getCommand(config, inputs);
   if (!command) return printUsage(config);
 
   if (typeof command === "string") {
-    return console.log(`luci ${inputs.join(' ')}`);
+    return console.log(`${indent(level)}luci ${inputs.join(' ')}`);
   }
 
   if (typeof command === "object" && (command as any).length) {
-    return console.log(`luci ${inputs.join(' ')}`);
+    return console.log(`${indent(level)}luci ${inputs.join(' ')}`);
   }
 
-  // NOTE: the json file assumed to not includes custom command named cmd.
+  // NOTE: the json file assumed to not include custom command named "cmd".
   if (typeof command === "object" && (command as CmdObj).cmd) {
     const cmdobj = command as CmdObj;
-    console.log(chalk.bgBlack(`luci ${inputs.join(' ')}`));
-    if (cmdobj.title) console.log(chalk.blue(`\t** ${cmdobj.title} **`));
-    if (cmdobj.description) console.log(chalk.gray(`\t> ${cmdobj.description}`));
+    console.log(chalk.bgBlack(`${indent(level)}luci ${inputs.join(' ')}`));
+    if (cmdobj.title) console.log(chalk.blue(`${indent(level+1)}** ${cmdobj.title} **`));
+    if (cmdobj.description) console.log(chalk.gray(`${indent(level+1)}> ${cmdobj.description}`));
+    if (typeof cmdobj.cmd === "object" && !(cmdobj.cmd as any).length) {
+      for (const innerCommand in cmdobj.cmd) {
+        printCommand(config, [...inputs, innerCommand], level + 1);
+      }
+    }
     return;
   }
 
@@ -73,15 +78,23 @@ function printCommand(config: Config, inputs: Array<string>) {
   }
 }
 
+function indent(count: number) {
+  let res = '';
+  for (let i = 0; i < count; i++) res += '\t';
+  return res;
+}
+
 function getCommand(config: Config, inputs: Array<string>): Command | null {
   const shell = getShellType();
   let command: any = config[shell];
   for (const input of inputs) {
-    if (!command) return null
+    if (!command) return null;
     if (typeof command === "string") return command;
     if (typeof command === "object" && command.length) return command;
-    if (typeof command === "object" && command.cmd) return command;
-    command = command[input];
+    if (typeof command === "object" && typeof command.cmd === "string") return command;
+    if (typeof command === "object" && typeof command.cmd === "object" && command.cmd.length) return command;
+    if (typeof command === "object" && typeof command.cmd === "object") command = command.cmd[input];
+    else command = command[input];
   }
   return command || null;
 }
