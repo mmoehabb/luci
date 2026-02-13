@@ -7,7 +7,7 @@
   },
   "scripts": {
     "start": "bun run src/main.ts",
-    "compile": "bun build src/main.ts --compile"
+    "compile": "bun build src/main.ts --compile --outfile ./dist/luci"
   },
   "peerDependencies": {
     "typescript": "^5"

@@ -8,12 +8,10 @@
       "exm2": {
         "title": "Example 2 Title",
         "description": "Example 2 Description",
-        "cmd": "echo Example 2"
+        "value": "echo Example 2"
       },
       "exm3": {
-        "title": "Example 3 Title",
-        "description": "Example 3 Description",
-        "cmd": {
+        "value": {
           "action1": "echo Example 3 Action 1",
           "action2": "echo Example 3 Action 2"
         }
