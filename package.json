@@ -2,18 +2,22 @@
   "name": "luci",
   "private": false,
   "version": "0.0.1",
+  "main": "./dist/main.js",
+  "bin": {
+    "luci": "./dist/main.js"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
   "scripts": {
     "start": "bun run src/main.ts",
-    "compile": "bun build src/main.ts --compile --outfile ./dist/luci"
+    "build": "bun build src/main.ts --outdir dist --minify --target bun",
+    "compile": "bun build src/main.ts --compile --outfile ./bin/luci"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "dependencies": {
     "chalk": "^5.6.2"
-  },
-  "packageManager": "pnpm@10.29.3+sha512.498e1fb4cca5aa06c1dcf2611e6fafc50972ffe7189998c409e90de74566444298ffe43e6cd2acdc775ba1aa7cc5e092a8b7054c811ba8c5770f84693d33d2dc"
+  }
 }
