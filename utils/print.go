@@ -12,7 +12,7 @@ import (
 func PrintHeader(c types.Config) {
 	color.HiGreen(`*** %s ***`, c.Title)
 	color.HiWhite(`> %s`, c.Description)
-	color.Yellow("\nUsage:\n")
+	color.Yellow("\nUsage:\n\n")
 }
 
 func PrintUsage(c types.Config) {
