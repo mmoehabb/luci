@@ -60,6 +60,11 @@ func PrintAction(c types.Config, inputs []string, level int) {
 	}
 }
 
+func PrintCommand(cmd string) {
+	color.New(color.BgGreen, color.FgHiWhite).Printf("+ %s", cmd)
+	fmt.Println()
+}
+
 func indent(count int) string {
 	var res strings.Builder
 	for range count {

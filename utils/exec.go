@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os/exec"
@@ -14,6 +15,10 @@ func Act(c types.Config, inputs []string) {
 	action := Dig(c, inputs)
 
 	if action == nil {
+		if len(inputs) <= 1 {
+			PrintUsage(c)
+			return
+		}
 		PrintAction(c, inputs[0:len(inputs)-1], 0)
 		return
 	}
@@ -60,29 +65,50 @@ func execAction(action any) bool {
 		} else {
 			cmd = exec.Command("/bin/sh", "-c", action)
 		}
-
-		output, err := cmd.CombinedOutput()
-		if err != nil {
-			log.Panicf("cmd.CombinedOutput() failed with %s\n", err)
-		}
-		fmt.Printf("\n%s\n", string(output))
+		PrintCommand(action)
+		execCmd(cmd)
 		return true
 
 	case []string:
 		var cmd *exec.Cmd
+		var cmdStr = strings.Join(action, " && ")
 		if runtime.GOOS == "windows" {
-			cmd = exec.Command("cmd", "/C", strings.Join(action, " && "))
+			cmd = exec.Command("cmd", "/C", cmdStr)
 		} else {
-			cmd = exec.Command("/bin/sh", "-c", strings.Join(action, " && "))
+			cmd = exec.Command("/bin/sh", "-c", cmdStr)
 		}
-
-		output, err := cmd.CombinedOutput()
-		if err != nil {
-			log.Panicf("cmd.CombinedOutput() failed with %s\n", err)
-		}
-		fmt.Printf("\n%s\n", string(output))
+		PrintCommand(cmdStr)
+		execCmd(cmd)
 		return true
 	}
 
 	return false
+}
+
+func execCmd(cmd *exec.Cmd) {
+	pipe, err := cmd.StdoutPipe()
+	if err != nil {
+		log.Fatal(err)
+	}
+	scanner := bufio.NewScanner(pipe)
+
+	err = cmd.Start()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for scanner.Scan() {
+		m := scanner.Text()
+		fmt.Println(m)
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	// Wait for the command to finish after reading all output
+	err = cmd.Wait()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
