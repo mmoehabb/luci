@@ -11,7 +11,7 @@ A simple CLI that unifies writting shell commands script files for different ope
 ## Install
 
 ```shell
-go install github.com/mmoehabb/luci  
+go install github.com/mmoehabb/luci@latest
 ```
 
 ## Why Luci?

@@ -6,12 +6,22 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/mmoehabb/luci/types"
 )
 
 func PrintHeader(c types.Config) {
+	color.HiGreen(`
+	  /\\_/\\  
+	 ( ^   ^ ) 
+	  >  ^  < 
+	`)
 	color.HiGreen(`*** %s ***`, c.Title)
-	color.HiWhite(`> %s`, c.Description)
+
+	colored := color.New(color.FgHiWhite).Sprint("> " + c.Description)
+	wrapped := text.WrapSoft(colored, 60)
+	fmt.Println(wrapped)
+
 	color.Yellow("\nUsage:\n\n")
 }
 
