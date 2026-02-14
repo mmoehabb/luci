@@ -2,6 +2,12 @@
 
 A simple CLI that unifies writting shell commands script files for different operating systems.
 
+## Install
+
+```shell
+go install github.com/mmoehabb/luci  
+```
+
 ## Why Luci?
 
 If you're a GNU/Linux developer, you’ve likely encountered this situation many times:
