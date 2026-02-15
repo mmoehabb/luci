@@ -37,37 +37,27 @@ The usual workarounds are:
 - Add a long README section explaining “how to make it work on Windows”
 - Tell Windows users “just use WSL” (which many perceive as hostile UX)
 
-Luci handles this issue by using a json config file instead of, e.g., bash scripts; this gives
+Luci handles this issue by using a toml config file instead of, e.g., bash scripts; this gives
 better structure for the project, along with universal usibility.
 
 Example of what this can look like:
 
-```json
-{
-  "title": "Hello World Example",
-  "description": "Just a simple example of using luci.",
-  "bash": {
-    "example": "echo Hello World!",
-    "run": {
-      "exm1": "echo Example 1",
-      "exm2": {
-        "title": "Example 2 Title",
-        "description": "Example 2 Description",
-        "value": "echo Example 2"
-      },
-      "exm3": {
-        "value": {
-          "action1": "echo Example 3 Action 1",
-          "action2": "echo Example 3 Action 2"
-        }
-      }
-    }
-  },
-  "zshell": {
-    "example": "echo Hello World!"
-  },
-  "bat": {
-    "example": "echo Hello World!"
-  }
-}
+```toml
+title = "Hello World Example"
+description = "Just a simple example of using luci."
+
+[bash]
+example = "echo Hello World!"
+
+[bash.run]
+exm1 = "echo Example 1"
+
+[bash.run.exm2]
+title = "Example 2 Title"
+description = "Example 2 Description"
+value = "echo Example 2"
+
+[bash.run.exm3.value]
+action1 = "echo Example 3 Action 1"
+action2 = "echo Example 3 Action 2"
 ```

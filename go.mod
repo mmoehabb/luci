@@ -3,6 +3,7 @@ module github.com/mmoehabb/luci
 go 1.25.1
 
 require (
+	github.com/BurntSushi/toml v1.6.0
 	github.com/fatih/color v1.18.0
 	github.com/jedib0t/go-pretty/v6 v6.7.8
 )
