@@ -1,9 +1,7 @@
 package utils
 
 import (
-	"bufio"
-	"fmt"
-	"log"
+	"os"
 	"os/exec"
 	"runtime"
 	"strings"
@@ -86,29 +84,9 @@ func execAction(action any) bool {
 }
 
 func execCmd(cmd *exec.Cmd) {
-	pipe, err := cmd.StdoutPipe()
-	if err != nil {
-		log.Fatal(err)
-	}
-	scanner := bufio.NewScanner(pipe)
-
-	err = cmd.Start()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for scanner.Scan() {
-		m := scanner.Text()
-		fmt.Println(m)
-	}
-
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
-	}
-
-	// Wait for the command to finish after reading all output
-	err = cmd.Wait()
-	if err != nil {
-		log.Fatal(err)
-	}
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	Must(cmd.Start())
+	Must(cmd.Wait())
 }

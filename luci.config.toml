@@ -1,0 +1,12 @@
+
+title = "Hello World!"
+description = "Luci config hello world example."
+
+[bash.run]
+example = "echo Hello World!"
+
+[zshell.run]
+example = "echo Hello World!"
+
+[bat.run]
+example = "echo Hello World!"
