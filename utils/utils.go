@@ -18,3 +18,9 @@ func GetShellType() types.ShellType {
 		return types.Unknown
 	}
 }
+
+func Must(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
