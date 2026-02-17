@@ -64,13 +64,13 @@ func digForAnnotatedActions(m map[string]any) {
 				digForAnnotatedActions(v)
 				continue
 			}
-			annAct := mapToAnnotatedAction(v)
+			annAct := MapToAnnotatedAction(v)
 			m[k] = annAct
 		}
 	}
 }
 
-func mapToAnnotatedAction(m map[string]any) types.AnnotatedAction {
+func MapToAnnotatedAction(m map[string]any) types.AnnotatedAction {
 	title := ""
 	if m["title"] != nil {
 		title = m["title"].(string)

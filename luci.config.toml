@@ -5,6 +5,16 @@ description = "Luci config hello world example."
 [bash.run]
 example = "echo Hello World!"
 
+[bash.group]
+title = "Group 1"
+
+[bash.group.value]
+action1 = "echo g1 - s1 - action1"
+
+[bash.group.value.action2]
+title = "SubGroup action2"
+value = "echo g1 - s1 - action2"
+
 [zshell.run]
 example = "echo Hello World!"
 

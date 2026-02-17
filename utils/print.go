@@ -1,8 +1,8 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
-	"reflect"
 	"strings"
 
 	"github.com/fatih/color"
@@ -27,39 +27,48 @@ func PrintHeader(c types.Config) {
 
 func PrintUsage(c types.Config) {
 	PrintHeader(c)
-	for action := range *GetShellConfig(c) {
-		PrintAction(c, []string{action}, 0)
+	shell := *GetShellConfig(c)
+	for action := range shell {
+		PrintActionWithInputs(shell, []string{action}, 0)
 	}
 }
 
-func PrintAction(c types.Config, inputs []string, level int) {
+func PrintActionWithInputs(c map[string]any, inputs []string, level int) error {
 	action := Dig(c, inputs)
 	if action == nil {
-		PrintUsage(c)
-		return
+		return errors.New("Action couldn't be found!")
 	}
+	PrintAction(action, inputs, level)
+	return nil
+}
 
-	switch Dig(c, inputs).(type) {
+func PrintAction(action any, inputs []string, level int) {
+	switch action := action.(type) {
 	case types.AnnotatedAction:
 		color.New(color.FgMagenta).Printf("%sluci %s\n", indent(level), strings.Join(inputs, " "))
-		annAct := action.(types.AnnotatedAction)
-		if annAct.Title != "" {
-			color.Blue("%s** %s **", indent(level+1), annAct.Title)
+		if action.Title != "" {
+			color.Blue("%s** %s **", indent(level+1), action.Title)
 		}
-		if annAct.Description != "" {
-			color.Black("%s> %s", indent(level+1), annAct.Description)
+		if action.Description != "" {
+			color.Black("%s> %s", indent(level+1), action.Description)
 		}
-		if reflect.ValueOf(annAct.Value).Kind() == reflect.Map {
-			for key := range annAct.Value.(map[string]any) {
-				PrintAction(c, append(inputs, key), level+1)
+		switch annVal := action.Value.(type) {
+		case map[string]any:
+			if annVal["value"] != nil {
+				fmt.Println("", inputs)
+				PrintAction(MapToAnnotatedAction(annVal), inputs, level+1)
+				return
 			}
 		}
-		return
+		PrintAction(action.Value, inputs, level+1)
 
 	case map[string]any:
-		m := action.(map[string]any)
-		for key := range m {
-			PrintAction(c, append(inputs, key), level)
+		if action["value"] != nil {
+			PrintAction(MapToAnnotatedAction(action), inputs, level)
+			return
+		}
+		for key := range action {
+			PrintAction(action[key], append(inputs, key), level)
 		}
 
 	case []string:

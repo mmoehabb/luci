@@ -10,14 +10,15 @@ import (
 )
 
 func Act(c types.Config, inputs []string) {
-	action := Dig(c, inputs)
+	shell := *GetShellConfig(c)
+	action := Dig(shell, inputs)
 
 	if action == nil {
 		if len(inputs) <= 1 {
 			PrintUsage(c)
 			return
 		}
-		PrintAction(c, inputs[0:len(inputs)-1], 0)
+		PrintActionWithInputs(shell, inputs[0:len(inputs)-1], 0)
 		return
 	}
 
@@ -51,7 +52,7 @@ func Act(c types.Config, inputs []string) {
 		}
 	}
 
-	PrintAction(c, inputs, 0)
+	PrintActionWithInputs(shell, inputs, 0)
 }
 
 func execAction(action any) bool {
