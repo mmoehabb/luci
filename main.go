@@ -13,7 +13,7 @@ func main() {
 	flag.Parse()
 
 	if *versionFlag {
-		fmt.Printf("LUCI version %s\n", "0.0.1")
+		fmt.Printf("LUCI version %s\n", "0.0.2")
 		os.Exit(0)
 	}
 

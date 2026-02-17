@@ -4,24 +4,10 @@ import (
 	"github.com/mmoehabb/luci/types"
 )
 
-func GetShellConfig(c types.Config) *types.ShellConfig {
-	var shellConfig *types.ShellConfig
-
-	switch GetShellType() {
-	case types.Bash:
-		shellConfig = &c.Bash
-	case types.Zshell:
-		shellConfig = &c.Zshell
-	case types.Bat:
-		shellConfig = &c.Bat
-	default:
-		shellConfig = &c.Bash
-	}
-
-	return shellConfig
-}
-
-// Return an Action or ActionRecord within the config c.
+// Dig recursively traverses the configuration structure based on the provided
+// input keys. It navigates through ShellConfig, AnnotatedAction, or map[string]any
+// types to find and return the action matching the given inputs. Returns nil if
+// no matching action is found.
 func Dig(action any, inputs []string) any {
 	for i, input := range inputs {
 		switch actTyped := action.(type) {
@@ -55,4 +41,26 @@ func Dig(action any, inputs []string) any {
 	}
 
 	return action
+}
+
+// MapToAnnotatedAction converts a generic map[string]any to an AnnotatedAction.
+// It extracts the title, description, and value fields from the map and returns
+// a properly typed AnnotatedAction struct. Fields that are not present default
+// to empty strings.
+func MapToAnnotatedAction(m map[string]any) types.AnnotatedAction {
+	title := ""
+	if m["title"] != nil {
+		title = m["title"].(string)
+	}
+
+	description := ""
+	if m["description"] != nil {
+		description = m["description"].(string)
+	}
+
+	return types.AnnotatedAction{
+		Title:       title,
+		Description: description,
+		Value:       m["value"],
+	}
 }

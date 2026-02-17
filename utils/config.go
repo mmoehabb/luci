@@ -23,6 +23,10 @@ example = "echo Hello World!"
 example = "echo Hello World!"
 `
 
+// LoadDefaultConfig loads the application configuration from luci.config.toml.
+// If the configuration file does not exist, it creates a default configuration
+// file with example settings. The function returns a populated Config struct
+// that contains all shell-specific settings and metadata.
 func LoadDefaultConfig() types.Config {
 	const configPath = "luci.config.toml"
 
@@ -44,46 +48,6 @@ func LoadDefaultConfig() types.Config {
 
 	// Parse the json data and perform the action the user passes in the arguments
 	c := types.Config{}
-	err = toml.Unmarshal(data, &c)
-	if err != nil {
-		panic(err)
-	}
-
-	// Convert map[string]any maps with value keys to AnnotatedActions
-	shellc := *GetShellConfig(c)
-	digForAnnotatedActions(shellc)
-
+	Must(toml.Unmarshal(data, &c))
 	return c
-}
-
-func digForAnnotatedActions(m map[string]any) {
-	for k, v := range m {
-		switch v := v.(type) {
-		case map[string]any:
-			if v["value"] == nil {
-				digForAnnotatedActions(v)
-				continue
-			}
-			annAct := MapToAnnotatedAction(v)
-			m[k] = annAct
-		}
-	}
-}
-
-func MapToAnnotatedAction(m map[string]any) types.AnnotatedAction {
-	title := ""
-	if m["title"] != nil {
-		title = m["title"].(string)
-	}
-
-	description := ""
-	if m["description"] != nil {
-		description = m["description"].(string)
-	}
-
-	return types.AnnotatedAction{
-		Title:       title,
-		Description: description,
-		Value:       m["value"],
-	}
 }
