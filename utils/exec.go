@@ -9,6 +9,10 @@ import (
 	"github.com/mmoehabb/luci/types"
 )
 
+// Act is the main entry point for executing actions based on user input.
+// It takes a configuration and a list of input arguments, resolves the appropriate
+// action from the shell configuration, and executes it. If no matching action is found,
+// it prints usage information or displays available actions.
 func Act(c types.Config, inputs []string) {
 	shell := *GetShellConfig(c)
 	action := Dig(shell, inputs)
@@ -71,11 +75,16 @@ func execAction(action any) bool {
 	case []string:
 		var cmd *exec.Cmd
 		var cmdStr = strings.Join(action, " && ")
-		if runtime.GOOS == "windows" {
+
+		switch runtime.GOOS {
+		case "windows":
 			cmd = exec.Command("cmd", "/C", cmdStr)
-		} else {
+		case "darwin":
+			cmd = exec.Command("/bin/zsh", "-c", cmdStr)
+		default:
 			cmd = exec.Command("/bin/sh", "-c", cmdStr)
 		}
+
 		PrintCommand(cmdStr)
 		execCmd(cmd)
 		return true

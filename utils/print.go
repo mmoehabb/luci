@@ -10,6 +10,9 @@ import (
 	"github.com/mmoehabb/luci/types"
 )
 
+// PrintHeader displays the application logo, title, and description from the
+// provided configuration. It uses colored output to make the header visually
+// distinctive and wraps the description text for better readability.
 func PrintHeader(c types.Config) {
 	color.HiGreen(`
 	  /\\_/\\  
@@ -25,6 +28,9 @@ func PrintHeader(c types.Config) {
 	color.Yellow("\nUsage:\n\n")
 }
 
+// PrintUsage prints the complete usage information, including the header and
+// all available actions from the shell configuration. It iterates through
+// each action in the configuration and displays them in a formatted manner.
 func PrintUsage(c types.Config) {
 	PrintHeader(c)
 	shell := *GetShellConfig(c)
@@ -33,6 +39,9 @@ func PrintUsage(c types.Config) {
 	}
 }
 
+// PrintActionWithInputs resolves an action from the configuration using the
+// provided inputs and prints it. It returns an error if the action cannot be
+// found, otherwise nil on successful printing.
 func PrintActionWithInputs(c map[string]any, inputs []string, level int) error {
 	action := Dig(c, inputs)
 	if action == nil {
@@ -42,6 +51,9 @@ func PrintActionWithInputs(c map[string]any, inputs []string, level int) error {
 	return nil
 }
 
+// PrintAction prints an action in a formatted way based on its type. It handles
+// AnnotatedAction, map[string]any, []string, and string types, applying
+// appropriate colors and indentation to display hierarchical action structures.
 func PrintAction(action any, inputs []string, level int) {
 	switch action := action.(type) {
 	case types.AnnotatedAction:
@@ -79,6 +91,9 @@ func PrintAction(action any, inputs []string, level int) {
 	}
 }
 
+// PrintCommand displays the command that is about to be executed with a
+// highlighted green background and white text, making it visually distinct
+// in the terminal output.
 func PrintCommand(cmd string) {
 	color.New(color.BgGreen, color.FgHiWhite).Printf("+ %s", cmd)
 	fmt.Println()
