@@ -22,24 +22,35 @@ func GetShellConfig(c types.Config) *types.ShellConfig {
 }
 
 // Return an Action or ActionRecord within the config c.
-func Dig(c types.Config, inputs []string) any {
-	shellc := *GetShellConfig(c)
-	action := shellc[inputs[0]]
-	if action == nil {
-		return nil
-	}
+func Dig(action any, inputs []string) any {
+	for i, input := range inputs {
+		switch actTyped := action.(type) {
+		case types.ShellConfig:
+			action = actTyped[input]
+			continue
 
-	for _, input := range inputs[1:] {
-		switch action.(type) {
 		case types.AnnotatedAction:
-			val := action.(types.AnnotatedAction).Value
-			switch val := val.(type) {
-			case map[string]any:
-				action = val[input]
-			}
+			action = Dig(actTyped.Value, inputs[i:])
+			continue
 
 		case map[string]any:
-			action = action.(map[string]any)[input]
+			if actTyped["value"] != nil {
+				action = Dig(MapToAnnotatedAction(actTyped), inputs[i:])
+				continue
+			}
+			action = actTyped[input]
+			continue
+		}
+
+		break
+	}
+
+	// In case the action is annotated one, then ensure that it's being return
+	// as AnnotatedAction
+	switch actTyped := action.(type) {
+	case map[string]any:
+		if actTyped["value"] != nil {
+			return MapToAnnotatedAction(actTyped)
 		}
 	}
 
