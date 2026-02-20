@@ -1,7 +1,7 @@
 ![cova_icon_v2 1](./splash.png)
 
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/mmoehabb/luci)
-[![Static Badge](https://img.shields.io/badge/v0.0.1-blue?logo=GitHub&label=Release)](https://github.com/mmoehabb/zigsdl/releases/tag/0.0.1)
+[![Static Badge](https://img.shields.io/badge/v0.0.3-blue?logo=GitHub&label=Release)](https://github.com/mmoehabb/luci/releases/tag/v0.0.3)
 [![Static Badge](https://img.shields.io/badge/MIT-silver?label=License)](https://github.com/mmoehabb/luci/blob/main/LICENSE)
 
 # About

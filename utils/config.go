@@ -1,11 +1,13 @@
 package utils
 
 import (
+	"bufio"
 	"io/fs"
 	"log"
 	"os"
 
 	"github.com/BurntSushi/toml"
+	"github.com/fatih/color"
 	"github.com/mmoehabb/luci/types"
 )
 
@@ -33,12 +35,14 @@ func LoadDefaultConfig() types.Config {
 	// Open and read the configuration file
 	_, err := os.Open(configPath)
 	if err != nil {
-		log.Println("luci.config.toml file not found!")
-		err = os.WriteFile(configPath, []byte(InitConfigStr), fs.ModePerm)
-		if err != nil {
-			panic("luci.config.toml creation failed!")
+		color.Red("luci.config.toml file not found!")
+		println()
+		color.Yellow("Create default config? [y/N] ")
+		if readApproval() {
+			createDefaultConfig()
+		} else {
+			log.Fatalln("You have to write luci.config.toml file in order to use luci.")
 		}
-		log.Println("✓ luci.config.toml has been created")
 	}
 
 	data, err := os.ReadFile(configPath)
@@ -50,4 +54,22 @@ func LoadDefaultConfig() types.Config {
 	c := types.Config{}
 	Must(toml.Unmarshal(data, &c))
 	return c
+}
+
+func createDefaultConfig() {
+	const configPath = "luci.config.toml"
+	err := os.WriteFile(configPath, []byte(InitConfigStr), fs.ModePerm)
+	if err != nil {
+		panic("luci.config.toml creation failed!")
+	}
+	log.Println("✓ luci.config.toml has been created")
+}
+
+func readApproval() bool {
+	reader := bufio.NewReader(os.Stdin)
+	char, _, err := reader.ReadRune()
+	if err != nil {
+		panic(err)
+	}
+	return char == 'Y' || char == 'y'
 }
