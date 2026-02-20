@@ -43,7 +43,7 @@ func PrintUsage(c types.Config) {
 // provided inputs and prints it. It returns an error if the action cannot be
 // found, otherwise nil on successful printing.
 func PrintActionWithInputs(c map[string]any, inputs []string, level int) error {
-	action := Dig(c, inputs)
+	action, _ := Dig(c, inputs)
 	if action == nil {
 		return errors.New("Action couldn't be found!")
 	}
@@ -92,10 +92,10 @@ func PrintAction(action any, inputs []string, level int) {
 }
 
 // PrintCommand displays the command that is about to be executed with a
-// highlighted green background and white text, making it visually distinct
+// highlighted black background and white text, making it visually distinct
 // in the terminal output.
-func PrintCommand(cmd string) {
-	color.New(color.BgGreen, color.FgHiWhite).Printf("+ %s", cmd)
+func PrintCommand(cmd string, args []string) {
+	color.New(color.BgBlack, color.FgHiWhite).Printf("+ %s %s", cmd, strings.Join(args, " "))
 	fmt.Println()
 }
 
