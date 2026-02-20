@@ -15,7 +15,8 @@ import (
 // it prints usage information or displays available actions.
 func Act(c types.Config, inputs []string) {
 	shell := *GetShellConfig(c)
-	action := Dig(shell, inputs)
+	action, i := Dig(shell, inputs)
+	args := inputs[i:]
 
 	if action == nil {
 		if len(inputs) <= 1 {
@@ -32,25 +33,25 @@ func Act(c types.Config, inputs []string) {
 
 		switch val.(type) {
 		case string:
-			executed := execAction(val)
+			executed := execAction(val, args)
 			if executed == true {
 				return
 			}
 		case []string:
-			executed := execAction(val)
+			executed := execAction(val, args)
 			if executed == true {
 				return
 			}
 		}
 
 	case []string:
-		executed := execAction(action)
+		executed := execAction(action, args)
 		if executed == true {
 			return
 		}
 
 	case string:
-		executed := execAction(action)
+		executed := execAction(action, args)
 		if executed == true {
 			return
 		}
@@ -59,16 +60,21 @@ func Act(c types.Config, inputs []string) {
 	PrintActionWithInputs(shell, inputs, 0)
 }
 
-func execAction(action any) bool {
+func execAction(action any, args []string) bool {
 	switch action := action.(type) {
 	case string:
 		var cmd *exec.Cmd
-		if runtime.GOOS == "windows" {
-			cmd = exec.Command("cmd", "/C", action)
-		} else {
-			cmd = exec.Command("/bin/sh", "-c", action)
+
+		switch runtime.GOOS {
+		case "windows":
+			cmd = exec.Command("cmd", "/C", action+" "+strings.Join(args, " "))
+		case "darwin":
+			cmd = exec.Command("/bin/zsh", "-c", action+" "+strings.Join(args, " "))
+		default:
+			cmd = exec.Command("/bin/sh", "-c", action+" "+strings.Join(args, " "))
 		}
-		PrintCommand(action)
+
+		PrintCommand(action, args)
 		execCmd(cmd)
 		return true
 
@@ -78,14 +84,14 @@ func execAction(action any) bool {
 
 		switch runtime.GOOS {
 		case "windows":
-			cmd = exec.Command("cmd", "/C", cmdStr)
+			cmd = exec.Command("cmd", "/C", cmdStr+" "+strings.Join(args, " "))
 		case "darwin":
-			cmd = exec.Command("/bin/zsh", "-c", cmdStr)
+			cmd = exec.Command("/bin/zsh", "-c", cmdStr+" "+strings.Join(args, " "))
 		default:
-			cmd = exec.Command("/bin/sh", "-c", cmdStr)
+			cmd = exec.Command("/bin/sh", "-c", cmdStr+" "+strings.Join(args, " "))
 		}
 
-		PrintCommand(cmdStr)
+		PrintCommand(cmdStr, args)
 		execCmd(cmd)
 		return true
 	}

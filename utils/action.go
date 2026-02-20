@@ -8,20 +8,31 @@ import (
 // input keys. It navigates through ShellConfig, AnnotatedAction, or map[string]any
 // types to find and return the action matching the given inputs. Returns nil if
 // no matching action is found.
-func Dig(action any, inputs []string) any {
-	for i, input := range inputs {
+//
+// It returns two values: the first is the action (AnnotatedAction, []string, or string),
+// the latter is the index, of the passed inputs array, on which the digging has been stopped.
+func Dig(action any, inputs []string) (any, int) {
+	var i int
+	var input string
+	var foundArgs = false
+	for i, input = range inputs {
+		foundArgs = true
+
 		switch actTyped := action.(type) {
 		case types.ShellConfig:
+			foundArgs = false
 			action = actTyped[input]
 			continue
 
 		case types.AnnotatedAction:
-			action = Dig(actTyped.Value, inputs[i:])
+			foundArgs = false
+			action, _ = Dig(actTyped.Value, inputs[i:])
 			continue
 
 		case map[string]any:
+			foundArgs = false
 			if actTyped["value"] != nil {
-				action = Dig(MapToAnnotatedAction(actTyped), inputs[i:])
+				action, _ = Dig(MapToAnnotatedAction(actTyped), inputs[i:])
 				continue
 			}
 			action = actTyped[input]
@@ -36,11 +47,15 @@ func Dig(action any, inputs []string) any {
 	switch actTyped := action.(type) {
 	case map[string]any:
 		if actTyped["value"] != nil {
-			return MapToAnnotatedAction(actTyped)
+			return MapToAnnotatedAction(actTyped), i
 		}
 	}
 
-	return action
+	if foundArgs == false {
+		i += 1
+	}
+
+	return action, i
 }
 
 // MapToAnnotatedAction converts a generic map[string]any to an AnnotatedAction.
