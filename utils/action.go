@@ -15,6 +15,7 @@ func Dig(action any, inputs []string) (any, int) {
 	var i int
 	var input string
 	var foundArgs = false
+
 	for i, input = range inputs {
 		foundArgs = true
 
@@ -51,7 +52,7 @@ func Dig(action any, inputs []string) (any, int) {
 		}
 	}
 
-	if foundArgs == false {
+	if foundArgs == false && len(inputs) > 0 {
 		i += 1
 	}
 
