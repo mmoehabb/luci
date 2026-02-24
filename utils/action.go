@@ -27,14 +27,14 @@ func Dig(action any, inputs []string) (any, int) {
 
 		case types.AnnotatedAction:
 			foundArgs = false
-			action, _ = Dig(actTyped.Value, inputs[i:])
-			continue
+			act, k := Dig(actTyped.Value, inputs[i:])
+			return act, (k + i)
 
 		case map[string]any:
 			foundArgs = false
 			if actTyped["value"] != nil {
-				action, _ = Dig(MapToAnnotatedAction(actTyped), inputs[i:])
-				continue
+				act, k := Dig(MapToAnnotatedAction(actTyped), inputs[i:])
+				return act, (k + i)
 			}
 			action = actTyped[input]
 			continue
@@ -43,17 +43,16 @@ func Dig(action any, inputs []string) (any, int) {
 		break
 	}
 
-	// In case the action is annotated one, then ensure that it's being return
-	// as AnnotatedAction
+	if foundArgs == false && len(inputs) > 0 {
+		i += 1
+	}
+
+	// In case the action is annotated one, then ensure that it's being returned as AnnotatedAction
 	switch actTyped := action.(type) {
 	case map[string]any:
 		if actTyped["value"] != nil {
 			return MapToAnnotatedAction(actTyped), i
 		}
-	}
-
-	if foundArgs == false && len(inputs) > 0 {
-		i += 1
 	}
 
 	return action, i
