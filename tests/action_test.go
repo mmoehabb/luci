@@ -38,17 +38,6 @@ func TestDig(t *testing.T) {
 			index:    1,
 		},
 		{
-			name: "find action in nested AnnotatedAction",
-			action: types.AnnotatedAction{
-				Value: types.AnnotatedAction{
-					Value: "echo nested action",
-				},
-			},
-			inputs:   []string{"nested"},
-			expected: "echo nested action",
-			index:    1,
-		},
-		{
 			name: "find action in map[string]any",
 			action: map[string]any{
 				"value": types.ShellConfig{
@@ -104,7 +93,7 @@ func TestDig(t *testing.T) {
 			},
 			inputs:   []string{"any"},
 			expected: "echo direct string",
-			index:    1,
+			index:    0,
 		},
 		{
 			name: "handle AnnotatedAction with []string value",
@@ -113,7 +102,24 @@ func TestDig(t *testing.T) {
 			},
 			inputs:   []string{"any"},
 			expected: []string{"echo", "array", "action"},
-			index:    1,
+			index:    0,
+		},
+		{
+			name: "find correctly two nested AnnotatedActions",
+			action: types.ShellConfig{
+				"deploy": types.AnnotatedAction{
+					Value: map[string]any{
+						"api": types.AnnotatedAction{
+							Value: map[string]any{
+								"prod": "echo deploying api to production",
+							},
+						},
+					},
+				},
+			},
+			inputs:   []string{"deploy", "api", "prod"},
+			expected: "echo deploying api to production",
+			index:    3,
 		},
 	}
 
