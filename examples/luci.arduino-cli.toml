@@ -1,0 +1,130 @@
+title = "ESP8266 / NodeMCU Development Helper"
+description = "Commands for compiling, flashing, uploading filesystem (LittleFS), monitoring serial, etc. for ESP8266 (NodeMCU v2)"
+
+# ************ BASH COMMANDS ************
+[bash]
+
+install = """
+arduino-cli config set network.connection_timeout 600s &&
+arduino-cli core update-index &&
+arduino-cli core install esp8266:esp8266 &&
+arduino-cli lib install "ArduinoJson"
+"""
+
+compile = """
+arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 \
+  --board-options "eesz=4M2M" \
+  --only-compilation-database . --build-path ./build
+
+arduino-cli compile . -p /dev/ttyUSB0 \
+  --fqbn esp8266:esp8266:nodemcuv2 \
+  --board-options "eesz=4M2M"
+"""
+
+"upload:data" = """
+rm -f data/*.gz
+gzip -k data/* || true
+
+mklittlefs -c ./data \
+  -p 256 \
+  -b 8192 \
+  -s 2072576 \
+  filesystem.bin
+
+esptool --chip esp8266 --port /dev/ttyUSB0 \
+  write-flash 0x200000 filesystem.bin
+
+rm -f filesystem.bin
+"""
+
+flash = """
+arduino-cli upload . -p /dev/ttyUSB0 \
+  --fqbn esp8266:esp8266:nodemcuv2 \
+  --board-options "eesz=4M2M"
+"""
+
+monitor = """
+arduino-cli monitor . -p /dev/ttyUSB0 \
+  --config baudrate=115200
+"""
+
+dev = """
+arduino-cli compile . -p /dev/ttyUSB0 \
+  --fqbn esp8266:esp8266:nodemcuv2 \
+  --board-options "eesz=4M2M" &&
+
+arduino-cli upload . -p /dev/ttyUSB0 \
+  --fqbn esp8266:esp8266:nodemcuv2 \
+  --board-options "eesz=4M2M" &&
+
+arduino-cli monitor . -p /dev/ttyUSB0 \
+  --config baudrate=115200
+"""
+
+restart = """
+esptool --chip esp8266 --port /dev/ttyUSB0 run &&
+arduino-cli monitor . -p /dev/ttyUSB0 \
+  --config baudrate=115200
+"""
+
+
+# ************ BAT COMMANDS ************
+[bat]
+
+install = """
+arduino-cli config set network.connection_timeout 600s &&
+arduino-cli core update-index &&
+arduino-cli core install esp8266:esp8266 &&
+arduino-cli lib install "ArduinoJson"
+"""
+
+compile = """
+arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 `
+  --board-options "eesz=4M2M" `
+  --only-compilation-database . --build-path ./build
+
+arduino-cli compile . -p COM3 `
+  --fqbn esp8266:esp8266:nodemcuv2 `
+  --board-options "eesz=4M2M"
+"""
+
+"upload:data" = """
+Remove-Item -Path data/*.gz -ErrorAction SilentlyContinue
+Get-ChildItem -Path data | ForEach-Object { gzip -k $_.FullName }
+
+mklittlefs -c ./data -p 256 -b 8192 -s 2072576 filesystem.bin
+
+esptool --chip esp8266 --port COM3 write-flash 0x200000 filesystem.bin
+
+Remove-Item -Path filesystem.bin -ErrorAction SilentlyContinue
+"""
+
+flash = """
+arduino-cli upload . -p /dev/ttyUSB0 \
+  --fqbn esp8266:esp8266:nodemcuv2 \
+  --board-options "eesz=4M2M"
+"""
+
+monitor = """
+arduino-cli monitor . -p /dev/ttyUSB0 \
+  --config baudrate=115200
+"""
+
+dev = """
+arduino-cli compile . -p /dev/ttyUSB0 \
+  --fqbn esp8266:esp8266:nodemcuv2 \
+  --board-options "eesz=4M2M" &&
+
+arduino-cli upload . -p /dev/ttyUSB0 \
+  --fqbn esp8266:esp8266:nodemcuv2 \
+  --board-options "eesz=4M2M" &&
+
+arduino-cli monitor . -p /dev/ttyUSB0 \
+  --config baudrate=115200
+"""
+
+restart = """
+esptool --chip esp8266 --port /dev/ttyUSB0 run &&
+arduino-cli monitor . -p /dev/ttyUSB0 \
+  --config baudrate=115200
+"""
