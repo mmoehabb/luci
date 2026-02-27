@@ -57,22 +57,31 @@ func PrintActionWithInputs(c map[string]any, inputs []string, level int) error {
 func PrintAction(action any, inputs []string, level int) {
 	switch action := action.(type) {
 	case types.AnnotatedAction:
-		color.New(color.FgMagenta).Printf("%sluci %s\n", indent(level), strings.Join(inputs, " "))
-		if action.Title != "" {
-			color.Blue("%s** %s **", indent(level+1), action.Title)
-		}
-		if action.Description != "" {
-			color.Black("%s> %s", indent(level+1), action.Description)
-		}
 		switch annVal := action.Value.(type) {
 		case map[string]any:
+			color.New(color.FgMagenta).Printf("%sluci %s\n", indent(level), strings.Join(inputs, " "))
+			if action.Title != "" {
+				color.Blue("%s** %s **", indent(level+1), action.Title)
+			}
+			if action.Description != "" {
+				color.Black("%s> %s", indent(level+1), action.Description)
+			}
 			if annVal["value"] != nil {
-				fmt.Println("", inputs)
 				PrintAction(MapToAnnotatedAction(annVal), inputs, level+1)
 				return
 			}
+			PrintAction(action.Value, inputs, level+1)
+
+		case string:
+			color.New(color.FgWhite).Printf("%sluci %s\t", indent(level), strings.Join(inputs, " "))
+			if action.Title != "" {
+				color.New(color.Faint).Printf("%s\t", action.Title)
+			}
+			color.New(color.Faint).Printf("%s\n", action.Description)
+
+		default:
+			PrintAction(action.Value, inputs, level+1)
 		}
-		PrintAction(action.Value, inputs, level+1)
 
 	case map[string]any:
 		if action["value"] != nil {
