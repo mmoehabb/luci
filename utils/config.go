@@ -50,17 +50,49 @@ func LoadDefaultConfig() types.Config {
 		panic(err)
 	}
 
-	// Parse the json data and perform the action the user passes in the arguments
+	return ParseTomlConfig(data)
+}
+
+func ParseTomlConfig(data []byte) types.Config {
 	c := types.Config{}
 	Must(toml.Unmarshal(data, &c))
+	for key, value := range c.Bash {
+		switch value := value.(type) {
+		case map[string]any:
+			nm := parseMapValues(value)
+			c.Bash[key] = nm
+		}
+	}
 	return c
+}
+
+func parseMapValues(m map[string]any) map[string]any {
+	nm := map[string]any{}
+
+	// it's a key-value map action
+	for key, value := range m {
+		switch value := value.(type) {
+		case map[string]any:
+			nm[key] = parseMapValues(value)
+		case []any:
+			strs := []string{}
+			for _, str := range value {
+				strs = append(strs, str.(string))
+			}
+			nm[key] = strs
+		default:
+			nm[key] = value
+		}
+	}
+
+	return nm
 }
 
 func createDefaultConfig() {
 	const configPath = "luci.config.toml"
 	err := os.WriteFile(configPath, []byte(InitConfigStr), fs.ModePerm)
 	if err != nil {
-		panic("luci.config.toml creation failed!")
+		panic("x luci.config.toml creation failed!")
 	}
 	log.Println("✓ luci.config.toml has been created")
 }

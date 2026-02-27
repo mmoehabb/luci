@@ -72,6 +72,13 @@ func PrintAction(action any, inputs []string, level int) {
 			}
 			PrintAction(action.Value, inputs, level+1)
 
+		case []string:
+			color.New(color.FgWhite).Printf("%sluci %s\t", indent(level), strings.Join(inputs, " "))
+			if action.Title != "" {
+				color.New(color.Faint).Printf("%s\t", action.Title)
+			}
+			color.New(color.Faint).Printf("%s\n", action.Description)
+
 		case string:
 			color.New(color.FgWhite).Printf("%sluci %s\t", indent(level), strings.Join(inputs, " "))
 			if action.Title != "" {
