@@ -13,7 +13,7 @@ action1 = "echo action1"
 [bash.group.value.action2]
 title = "SubGroup action2 Title"
 description = "SubGroup action2 Desc"
-value = "echo action2"
+value = ["echo action2"]
 
 [bash.group.value.action3]
 title = "SubGroup action3 Title"
