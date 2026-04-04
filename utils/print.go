@@ -5,14 +5,12 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/charmbracelet/huh"
 	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/mmoehabb/luci/types"
 )
 
-// PrintHeader displays the application logo, title, and description from the
-// provided configuration. It uses colored output to make the header visually
-// distinctive and wraps the description text for better readability.
 func PrintHeader(c types.Config) {
 	color.HiGreen(`
 	  /\\_/\\  
@@ -28,9 +26,105 @@ func PrintHeader(c types.Config) {
 	color.Yellow("\nUsage:\n\n")
 }
 
-// PrintUsage prints the complete usage information, including the header and
-// all available actions from the shell configuration. It iterates through
-// each action in the configuration and displays them in a formatted manner.
+func PrintInteractiveUsage(c types.Config) {
+	shell := *GetShellConfig(c)
+	actions := CollectActions(shell)
+	displayLevel(c, []string{}, actions)
+}
+
+func displayLevel(c types.Config, path []string, actions []ActionNode) {
+	title := "Select an action"
+	if len(path) > 0 {
+		title = fmt.Sprintf("Select an action (%s)", strings.Join(path, " > "))
+	}
+
+	options := []huh.Option[string]{}
+	if len(path) > 0 {
+		options = append(options, huh.NewOption("⬅ Back", BackKey))
+	}
+
+	for _, action := range actions {
+		description := action.Description
+		if description == "" {
+			description = action.Title
+		}
+		marker := "▸"
+		if action.IsGroup {
+			marker = "▸"
+		} else {
+			marker = "•"
+		}
+		label := fmt.Sprintf("%s %s", marker, description)
+		options = append(options, huh.NewOption(label, action.Key))
+	}
+
+	var selected string
+	selection := huh.NewSelect[string]().
+		Title(title).
+		Options(options...).
+		Value(&selected)
+
+	err := selection.Run()
+	if err != nil {
+		color.New(color.FgYellow).Println("\nCancelled")
+		return
+	}
+
+	if selected == BackKey {
+		if len(path) > 0 {
+			parentPath := path[:len(path)-1]
+			shell := *GetShellConfig(c)
+			var parentActions []ActionNode
+			if len(parentPath) == 0 {
+				parentActions = CollectActions(shell)
+			} else {
+				parentConfig, _ := Dig(shell, parentPath)
+				if parentConfig != nil {
+					parentActions = CollectActions(parentConfig.(map[string]any))
+				}
+			}
+			displayLevel(c, parentPath, parentActions)
+		}
+		return
+	}
+
+	newPath := append(path, selected)
+	shell := *GetShellConfig(c)
+	selectedAction, _ := Dig(shell, newPath)
+
+	if selectedAction == nil {
+		displayLevel(c, path, actions)
+		return
+	}
+
+	switch a := selectedAction.(type) {
+	case types.AnnotatedAction:
+		if nested, ok := a.Value.(map[string]any); ok {
+			if _, hasValue := nested["value"]; hasValue {
+				Act(c, newPath)
+			} else {
+				children := CollectActions(nested)
+				displayLevel(c, newPath, children)
+			}
+		} else {
+			Act(c, newPath)
+		}
+	case map[string]any:
+		if a["value"] != nil {
+			Act(c, newPath)
+		} else {
+			children := CollectActions(a)
+			displayLevel(c, newPath, children)
+		}
+	case string:
+		Act(c, newPath)
+	case []string:
+		Act(c, newPath)
+	default:
+		displayLevel(c, path, actions)
+	}
+}
+
 func PrintUsage(c types.Config) {
 	PrintHeader(c)
 	shell := *GetShellConfig(c)
@@ -39,9 +133,6 @@ func PrintUsage(c types.Config) {
 	}
 }
 
-// PrintActionWithInputs resolves an action from the configuration using the
-// provided inputs and prints it. It returns an error if the action cannot be
-// found, otherwise nil on successful printing.
 func PrintActionWithInputs(c map[string]any, inputs []string, level int) error {
 	action, _ := Dig(c, inputs)
 	if action == nil {
@@ -51,9 +142,6 @@ func PrintActionWithInputs(c map[string]any, inputs []string, level int) error {
 	return nil
 }
 
-// PrintAction prints an action in a formatted way based on its type. It handles
-// AnnotatedAction, map[string]any, []string, and string types, applying
-// appropriate colors and indentation to display hierarchical action structures.
 func PrintAction(action any, inputs []string, level int) {
 	switch action := action.(type) {
 	case types.AnnotatedAction:
@@ -107,9 +195,6 @@ func PrintAction(action any, inputs []string, level int) {
 	}
 }
 
-// PrintCommand displays the command that is about to be executed with a
-// highlighted black background and white text, making it visually distinct
-// in the terminal output.
 func PrintCommand(cmd string, args []string) {
 	color.New(color.BgBlack, color.FgHiWhite).Printf("+ %s %s", cmd, strings.Join(args, " "))
 	fmt.Println()

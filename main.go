@@ -9,6 +9,7 @@ import (
 )
 
 func main() {
+	listFlag := flag.Bool("list", false, "List actions without interactive selection")
 	versionFlag := flag.Bool("version", false, "Print version information and exit")
 	flag.Parse()
 
@@ -18,8 +19,10 @@ func main() {
 	}
 
 	c := utils.LoadDefaultConfig()
-	if len(os.Args) < 2 {
+	if *listFlag {
 		utils.PrintUsage(c)
+	} else if len(os.Args) < 2 {
+		utils.PrintInteractiveUsage(c)
 	} else {
 		utils.Act(c, os.Args[1:])
 	}
