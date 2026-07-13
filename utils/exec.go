@@ -1,11 +1,13 @@
 package utils
 
 import (
+	"errors"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/mmoehabb/luci/types"
 )
 
@@ -103,6 +105,18 @@ func execCmd(cmd *exec.Cmd) {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	Must(cmd.Start())
-	Must(cmd.Wait())
+
+	if err := cmd.Start(); err != nil {
+		color.Red("Failed to start command: %s\n", err)
+		os.Exit(1)
+	}
+
+	if err := cmd.Wait(); err != nil {
+		var exitErr *exec.ExitError
+		if errors.As(err, &exitErr) {
+			os.Exit(exitErr.ExitCode())
+		}
+		color.Red("Command failed: %s\n", err)
+		os.Exit(1)
+	}
 }
