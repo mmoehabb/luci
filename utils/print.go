@@ -27,8 +27,8 @@ func PrintHeader(c types.Config) {
 }
 
 func PrintInteractiveUsage(c types.Config) {
-	shell := *GetShellConfig(c)
-	actions := CollectActions(shell)
+	merged := *GetMergedShellConfig(c)
+	actions := CollectActions(merged)
 	displayLevel(c, []string{}, actions)
 }
 
@@ -73,12 +73,12 @@ func displayLevel(c types.Config, path []string, actions []ActionNode) {
 	if selected == BackKey {
 		if len(path) > 0 {
 			parentPath := path[:len(path)-1]
-			shell := *GetShellConfig(c)
+			merged := *GetMergedShellConfig(c)
 			var parentActions []ActionNode
 			if len(parentPath) == 0 {
-				parentActions = CollectActions(shell)
+				parentActions = CollectActions(merged)
 			} else {
-				parentConfig, _ := Dig(shell, parentPath)
+				parentConfig, _ := Dig(merged, parentPath)
 				if parentConfig != nil {
 					parentActions = CollectActions(parentConfig.(map[string]any))
 				}
@@ -89,8 +89,8 @@ func displayLevel(c types.Config, path []string, actions []ActionNode) {
 	}
 
 	newPath := append(path, selected)
-	shell := *GetShellConfig(c)
-	selectedAction, _ := Dig(shell, newPath)
+	merged := *GetMergedShellConfig(c)
+	selectedAction, _ := Dig(merged, newPath)
 
 	if selectedAction == nil {
 		displayLevel(c, path, actions)
@@ -127,9 +127,9 @@ func displayLevel(c types.Config, path []string, actions []ActionNode) {
 
 func PrintUsage(c types.Config) {
 	PrintHeader(c)
-	shell := *GetShellConfig(c)
-	for action := range shell {
-		PrintActionWithInputs(shell, []string{action}, 0)
+	merged := *GetMergedShellConfig(c)
+	for action := range merged {
+		PrintActionWithInputs(merged, []string{action}, 0)
 	}
 }
 

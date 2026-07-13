@@ -21,8 +21,10 @@ example = "echo Hello World!"
 [zshell.run]
 example = "echo Hello World!"
 
-[bat.run]
+[powershell.run]
 example = "echo Hello World!"
+
+["*"]
 `
 
 // LoadDefaultConfig loads the application configuration from luci.config.toml.
@@ -61,6 +63,13 @@ func ParseTomlConfig(data []byte) types.Config {
 		case map[string]any:
 			nm := parseMapValues(value)
 			c.Bash[key] = nm
+		}
+	}
+	for key, value := range c.Wildcard {
+		switch value := value.(type) {
+		case map[string]any:
+			nm := parseMapValues(value)
+			c.Wildcard[key] = nm
 		}
 	}
 	return c
