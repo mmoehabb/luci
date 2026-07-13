@@ -5,7 +5,8 @@ type Config struct {
 	Description string
 	Bash        ShellConfig
 	Zshell      ShellConfig
-	Bat         ShellConfig
+	Powershell  ShellConfig
+	Wildcard    ShellConfig `toml:"*"`
 }
 
 type ShellConfig map[string]any // any: Action or ActionRecord
@@ -29,6 +30,6 @@ type ShellType int
 const (
 	Bash ShellType = iota
 	Zshell
-	Bat
+	Powershell
 	Unknown
 )

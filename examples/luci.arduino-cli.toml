@@ -68,8 +68,8 @@ arduino-cli monitor . -p /dev/ttyUSB0 \
 """
 
 
-# ************ BAT COMMANDS ************
-[bat]
+# ************ POWERSHELL COMMANDS ************
+[powershell]
 
 install = """
 arduino-cli config set network.connection_timeout 600s &&

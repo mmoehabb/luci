@@ -11,11 +11,11 @@ import (
 
 // Act is the main entry point for executing actions based on user input.
 // It takes a configuration and a list of input arguments, resolves the appropriate
-// action from the shell configuration, and executes it. If no matching action is found,
-// it prints usage information or displays available actions.
+// action from the shell configuration (with wildcard fallback), and executes it.
+// If no matching action is found, it prints usage information or displays available actions.
 func Act(c types.Config, inputs []string) {
-	shell := *GetShellConfig(c)
-	action, i := Dig(shell, inputs)
+	merged := *GetMergedShellConfig(c)
+	action, i := Dig(merged, inputs)
 	args := inputs[i:]
 
 	if action == nil {
@@ -23,7 +23,7 @@ func Act(c types.Config, inputs []string) {
 			PrintUsage(c)
 			return
 		}
-		PrintActionWithInputs(shell, inputs[0:len(inputs)-1], 0)
+		PrintActionWithInputs(merged, inputs[0:len(inputs)-1], 0)
 		return
 	}
 
@@ -57,7 +57,7 @@ func Act(c types.Config, inputs []string) {
 		}
 	}
 
-	PrintActionWithInputs(shell, inputs, 0)
+	PrintActionWithInputs(merged, inputs, 0)
 }
 
 func execAction(action any, args []string) bool {

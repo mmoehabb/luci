@@ -26,5 +26,8 @@ act2 = "echo action3 act2"
 [zshell.run]
 example = "echo Hello World!"
 
-[bat.run]
+[powershell.run]
 example = "echo Hello World!"
+
+["*".run]
+example-wildcard = "echo Hello Wildcard!"
